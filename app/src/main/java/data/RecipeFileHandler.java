@@ -2,14 +2,16 @@ package data;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 public class RecipeFileHandler {
     private String filePath;
 
     public RecipeFileHandler() {
+        // filePath = "app/src/main/resources/recipes.txt";
         filePath = "app/src/main/resources/recipes.txt";
     }
 
@@ -24,90 +26,57 @@ public class RecipeFileHandler {
      *
      * @return レシピデータ
      */
-    public ArrayList<String> readRecipes() throws IOException {
-        // 1.Main Menu:とディスプレイの出力
-        // System.out.println(
-        //         Main Menu:
-        //         \n 1: Display Recipes
-        //         \n 2: Add New Recipe
-        //         \n 3: Search Recipe
-        //         \n 4: Exit Application
-        //         \n Please choose an option: ");
 
-        try {
-
-        //2.番号の入力を受け取る
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        int option = Integer.parseInt(reader.readLine());
-        System.out.print(option);
-
-        } catch (IOException e) {
-            System.out.println("Error reading file:" + e.getMessage());
-        }
-        return null;
-
-        //3.「Recipes:」と出力
-        System.out.println("Recipes:");
-
-        //4.繰り返し処理(データの個数20回繰り返す)
-            for (int i = 0; i < 20; i++) {
-            // (1)-----------------------------------
-            //    Recipe Name: + 「recipes.txt」の各列一単語目
-                System.out.println("-----------------------------------" +
-                "Recipe Name:");
+    //  1. 返却用のリストを初期化する ArrayList<String> recipes = new ArrayList<>();
+    ArrayList<String> recipes = new ArrayList<>();
+    // 2. BufferedReaderを用いてrecipes.txtを読み込み、変数readerに代入する
+    // * IOExceptionが発生したときはコンソールにエラーメッセージを表示する
+    // * Error reading file: 例外のメッセージ
+    public ArrayList<String> readRecipes() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            // 3. readerよりreadLine()を呼び出し、結果をlineに代入する（結果がnullとなるまで繰り返す）
+            // * レシピデータを1行読み込み、recipesに追加する
+            String line;
+            while ((line = reader.readLine()) != null) {
+                recipes.add(line);//lineをadd、1行分ずつ入ってくる
+                // System.out.println(line);
             }
-
-            // (2)「Main Ingredients: 」と出力
-            // (3)上記に続いて2単語目以降を（「,」で区切って）出力
-                System.out.println("Main Ingredients:");
-
-    }
-    
-
-    /**
-     * 設問2: 新規登録機能
-     * 新しいレシピをrecipes.txtに追加します。<br>
-     * レシピ名と材料はカンマ区切りで1行としてファイルに書き込まれます。
-     *
-     * @param recipeName レシピ名
-     * @param ingredients 材料名
-     */
-     //
-    public void addRecipe(String recipeName, String ingredients) {
-        // 1.Main Menu:とディスプレイを出力
-        // System.out.print(
-        //         Main Menu:
-        //         \n 1: Display Recipes
-        //         \n 2: Add New Recipe
-        //         \n 3: Search Recipe
-        //         \n 4: Exit Application
-        //         \n Please choose an option: ");
-
-        // 2.番号を受け付ける
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        
-
-        // 3.ファイル「RecipeFileHandler」に書き込む
-        try(BufferedWriter writer = new BufferedWriter(new FilneWriter(recipes ,true))) {
-            writer.write(contentTowrite);
-            writer.newLine();
-            // 4. 「Enter recipe name: 」と出力
-            System.out.println("Enter recipe name: ");
-            // 5.レシピ名を受け付ける
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            // 6.「recipes.txt」に追加する
-            String recipe = reader.readLine();
-            // 7.「Enter main ingredients (comma separated): 」と出力
-            System.out.println("Enter main ingredients (comma separated): ");
-            // 8. 材料を受け付ける
-            String ingredient = reader.readLine();
-            // 9. 「recipes.txt」に追加する
-            
-            // 10.「Recipe added successfully.」と出力
-            System.out.println("Recipe added successfully.");
         } catch (IOException e) {
             System.out.println("Error reading file:" + e.getMessage());
         }
+        //4. recipesを返却する(readRecipes();実行元に)
+        return recipes;
+    }
 
+    // /**
+    //  * 設問2: 新規登録機能
+    //  * 新しいレシピをrecipes.txtに追加します。<br>
+    //  * レシピ名と材料はカンマ区切りで1行としてファイルに書き込まれます。
+    //  * IOExceptionが発生したときは`Error reading file: 例外のメッセージ`とコンソールに表示します。 |
+    //  *
+    //  * @param recipeName レシピ名
+    //  * @param ingredients 材料名
+    //  */
+
+    public void addRecipe(String recipeName, String ingredients) {
+        readRecipes();
+        // 1、新しいレシピを`recipes.txt`に追加
+        // （1）BufferedWriter を使ってファイルに書き込むコードを記述
+        // （2）filePathを利用してrecipes.txtに保存する
+        // （3）BuffferedWriterの記述にtrueと書き込み後の改行writer.newLineを追加
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath,true));) {
+            writer.newLine();
+        // 2、レシピ名と材料はカンマ区切りで1行としてファイルに書き込まれます。
+        // （1）writer.write()メソッドを使って文字列を保存する
+            // writer.write(filePath);
+            writer.write(recipeName + "," +ingredients);
+        } catch (IOException e) {
+        // 3、IOExceptionが発生したときは`Error reading file: 例外のメッセージ`とコンソールに表示 |
+        // （1）try、catch構文を使って例外のメッセージを表示
+            System.out.println("Error reading file:" + e.getMessage());
+        }
     }
 }
+
+
+
